@@ -1,0 +1,148 @@
+{# custom javascript and modal to support editing a note #}
+{% block page_javascript %}
+    <script language="Javascript">
+
+        function EditNote(url, header, title, scope, permissions, content, groups, button){
+            /*
+             Description:
+                Launch modal to confirm actions
+
+             Parameters:
+                 url         - url to access on confirmation
+                 header      - modal window header
+                 title       - data in the 'title' textbox
+                 scope       - data in the 'scope' selectbox
+                 permissions - data in the 'permissions' selectbox
+                 content     - data in the 'content' textarea
+                 groups      - tbd
+                 button	     - action button label
+            */
+            if (url === undefined){
+                return;
+            }
+            if (header === undefined){
+                var header = "Confirm";
+            }
+            if (button === undefined){
+                var button = "Continue";
+            }
+            var group_names = groups.split(/(\s+)/).filter( e => e.trim().length > 0)
+            var element = document.getElementById('groups');
+            for (var i = 0; i < element.options.length; i++) {
+                element.options[i].selected = group_names.indexOf(element.options[i].value) >= 0;
+            }
+
+            document.getElementById("title").value = title;
+            document.getElementById("scope").value = scope;
+            document.getElementById("permissions").value = permissions;
+            document.getElementById("content").value = content;
+            document.getElementById("id_modalEditNoteHeader").innerHTML = "<b>"+header+"</b>";
+            document.getElementById("id_modalEditNote_OK").innerHTML = button;
+            var okbutton = document.getElementById("id_modalEditNote_OK");
+
+            document.getElementById("id_modalEditNote_OK").onclick = function(){postEditNote(url);};
+            $("#id_modalEditNote_OK").attr('class', 'btn btn-primary text-light');
+            $("#id_modalEditNote").modal({show:true});
+        }
+
+        function postEditNote(url){
+            /*
+             Description:
+                Send a POST using #modalsubmitform down below. Updates action to input url.
+
+             Parameters:
+                url   - url to POST a blank form to.
+            */
+            var dummyform = $('#modalsubmitform');
+            var title = document.getElementById("title").value;
+            var scope = document.getElementById("scope").value;
+            var permissions = document.getElementById("permissions").value;
+            var content = document.getElementById("content").value;
+            var groups = $('#groups').val();
+            dummyform.attr('action', url+"&title="+title+"&scope="+scope+"&permissions="+permissions+"&content="+content+"&groups="+groups);
+            dummyform.attr('method', 'POST');
+            dummyform.submit();
+        }
+
+    </script>
+{% endblock %}
+
+<!-- MODAL: edit note -->
+<div id="id_modalEditNoteWrapper">
+    <div class="modal fade" id="id_modalEditNote" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="id_modalEditNoteHeader"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body" id="id_modalEditNoteBody">
+
+                    <form class="form-horizontal" role="form" action="">
+                        <div class="form-group">
+                            <div class="mt-2 row text-left">
+                                <div class="col-sm-4">
+                                    <label class="control-label" for="title"><b>Title:</b></label>
+                                </div>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="title" name="title"/>
+                                </div>
+                            </div>
+                            <div class="mt-2 row text-left">
+                                <div class="col-sm-4">
+                                    <label class="control-label" for="scope"><b>Scope:</b></label>
+                                </div>
+                                <div class="col-sm-8">
+                                    <select class="form-control" id="scope" name="scope">
+                                        <option value="public">public</option>
+                                        <option value="group">group</option>
+                                        <option value="private">private</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-2 row text-left">
+                                <div class="col-sm-4">
+                                    <label class="control-label" for="permissions"><b>Permissions:</b></label>
+                                </div>
+                                <div class="col-sm-8">
+                                    <select class="form-control" id="permissions" name="permissions">
+                                        <option value="read">read</option>
+                                        <option value="read, edit">read, edit</option>
+                                        <option value="read, edit, delete">read, edit, delete</option>
+                                        <option value="read, delete">read, delete</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-2 row text-left">
+                                <div class="col-sm-4">
+                                    <label class="control-label" for="content"><b>Content:</b></label>
+                                </div>
+                                <div class="col-sm-8">
+                                    <textarea rows="5" class="form-control" id="content" name="content"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 row text-left">
+                                <div class="col-sm-4">
+                                    <label class="control-label" for="groups"><b>Groups:</b></label>
+                                </div>
+                                <div class="col-sm-8">
+                                    <select class="form-control" id="groups" multiple="multiple">
+                                        {% for group in groups %}
+                                        <option value="{{ group.name}}">{{ group.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer" id="id_modalEditNoteFooter">
+                    <button class="btn btn-light" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <a class="btn btn-primary text-light" id="id_modalEditNote_OK"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
