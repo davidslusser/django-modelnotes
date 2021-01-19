@@ -1,6 +1,6 @@
 import os
 from setuptools import setup, find_packages
-import modelnotes
+import notes
 
 with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as readme:
     README = readme.read()
@@ -9,7 +9,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8'
 with open('requirements/base.txt') as f:
     required = f.read().splitlines()
 
-version = modelnotes.__version__
+version = notes.__version__
 
 setup(
     name='django-modelnotes',
@@ -19,9 +19,9 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     version=version,
-    license=modelnotes.__license__,
-    author=modelnotes.__author__,
-    author_email=modelnotes.__email__,
+    license=notes.__license__,
+    author=notes.__author__,
+    author_email=notes.__email__,
     url='https://github.com/davidslusser/django-modelnotes',
     download_url='https://github.com/davidslusser/django-modelnotes/archive/{}.tar.gz'.format(version),
     keywords=['django', 'helpers', 'notes', 'model', 'models'],
