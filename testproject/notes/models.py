@@ -13,13 +13,9 @@ if 'auditlog' in settings.INSTALLED_APPS:
 
 def get_default_scope():
     """ get the default scope """
-    return Scope.objects.get_or_create(name='private')[0]
-
-
-def get_default_permission():
-    """ get the default permission """
-    return Permission.objects.get_or_create(name='read')[0]
-
+    data = Scope.objects.get_or_create(name='private')[0]
+    print("TEST: ", data)
+    return data.id
 
 class Scope(HandyHelperBaseModel):
     """ Track the scope of a note; build-in scopes include:
@@ -114,8 +110,8 @@ class GroupPermission(HandyHelperBaseModel):
 class PublicPermission(HandyHelperBaseModel):
     """ through table to link public permissions on a note """
     note = models.ForeignKey(Note, on_delete=models.CASCADE)
-    permissions = models.ForeignKey(Permission, blank=True, null=True, on_delete=models.SET_NULL,
-                                    help_text='actions that can be performed on a public scoped note')
+    permission = models.ForeignKey(Permission, blank=True, null=True, on_delete=models.SET_NULL,
+                                   help_text='actions that can be performed on a public scoped note')
 
 
 if 'auditlog' in settings.INSTALLED_APPS:

@@ -4,14 +4,14 @@ import os
 import django
 from model_bakery import baker
 sys.path.append(str(environ.Path(__file__) - 4))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testproject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testproject.testproject.settings')
 django.setup()
 
 from django.test import TestCase
 
 # import models
 from auditlog.models import LogEntry
-from notes.models import (Scope, Permission, Note, GroupPermission)
+from notes.models import (Scope, Permission, Note, GroupPermission, PublicPermission)
 
 
 class ScopeTests(TestCase):
@@ -152,6 +152,42 @@ class GroupPermissionTests(TestCase):
         new_permission = Permission.objects.get_or_create(name='test')[0]
         row.permissions.add(new_permission)
         self.assertIn(new_permission, row.permissions.all())
+
+    def test_delete(self):
+        """ verify object can be deleted """
+        row = baker.make(self.to_bake)
+        row_id = row.id
+        row.delete()
+        queryset = self.model.objects.get_object_or_none(id=row_id)
+        self.assertIsNone(queryset)
+
+
+class PublicPermissionTests(TestCase):
+    """ test CRUD operations on PublicPermission """
+    def setUp(self):
+        self.model = PublicPermission
+        self.to_bake = f'notes.{self.model.__name__}'
+        for perm in ['read', 'edit', 'delete']:
+            Permission.objects.get_or_create(name=perm)
+
+    def test_create(self):
+        """ verify object can be created """
+        row = baker.make(self.to_bake)
+        self.assertTrue(isinstance(row, self.model))
+
+    def test_read(self):
+        """ verify object can be read """
+        row = baker.make(self.to_bake)
+        entry = self.model.objects.get(id=row.id)
+        self.assertTrue(isinstance(entry, self.model))
+        self.assertEqual(row.id, entry.id)
+
+    def test_update(self):
+        """ verify object can be updated """
+        row = baker.make(self.to_bake)
+        new_permission = Permission.objects.get_or_create(name='test')[0]
+        row.permissions = new_permission
+        self.assertEqual(new_permission, row.permissions)
 
     def test_delete(self):
         """ verify object can be deleted """
