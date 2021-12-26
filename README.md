@@ -4,11 +4,11 @@ A django-modelnotes is a reusable django application for adding notes to models.
 _**This app is still under development**_ 
 
 
-| | |
-|--------------|------|
-| Author       | David Slusser |
+| |                                                |
+|--------------|------------------------------------------------|
+| Author       | David Slusser                                  |
 | Description  | A django application for adding notes to models. |
-| Requirements | `Python 3.x`<br>`Django 2.2.x` |
+| Requirements | `Python 3.x`<br>`Django 3.x`                   |
 
 # Documentation
 
@@ -22,33 +22,31 @@ pip install django-modelnotes
 ```python
     INSTALLED_APPS = [
         ...
-        'notes',
+        'modelnotes',
     ]
 ```
 - to include views to manage notes, add the following to your project-level urls.py:
 ```python
-    from notes.urls import *
-    
+   
     urlpatterns = [
         ...
-        path('', include('notes.urls'), ),
+        path('modelnotes/', include('modelnotes.urls', )),
     ]
 ```
 
 - run migrations
  ```shell script
- python ./manage.py migrate notes
+ python ./manage.py migrate modelnotes
 ```
 
 # Usage
 add to models via GenericRelation
 ```python
-from django.contrib.contenttypes.fields import GenericRelation
-from notes.models import Note
+from modelnotes.models import ModelNoteField
 
 class MyModel(models.Model):
     ...
-    notes = GenericRelation(Note)
+    notes = ModelNoteField()
 ```
 
 # License 

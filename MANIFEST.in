@@ -1,3 +1,2 @@
-include README.md
-include requirements/base.txt
-recursive-include notes/templates *
+# Include the src files
+recursive-include src/modelnotes *

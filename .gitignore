@@ -125,3 +125,4 @@ local_test/*
 
 # Apple garbage
 *.DS_Store
+/to_delete/
