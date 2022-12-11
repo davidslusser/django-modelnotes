@@ -1,0 +1,2 @@
+# Include the src files
+recursive-include src/modelnotes *

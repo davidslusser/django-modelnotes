@@ -12,7 +12,7 @@ urlpatterns = [
     path('list_all_notes/', gui.ListAllNotes.as_view(), name='list_all_notes'),
 
     # action views
-    path('update_note/', action.UpdateNote.as_view(), name='update_note'),
+    path('edit_note/', action.EditNote.as_view(), name='edit_note'),
     path('delete_note/<int:pk>', action.DeleteNote.as_view(), name='delete_note'),
 
 ]

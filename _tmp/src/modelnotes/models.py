@@ -1,8 +1,8 @@
 from django.apps import apps
-from django.db import models
+from django.db import models, DEFAULT_DB_ALIAS
 from django.conf import settings
 from django.contrib.auth.models import User, Group
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from handyhelpers.models import HandyHelperBaseModel
@@ -124,6 +124,25 @@ class PublicPermission(HandyHelperBaseModel):
     note = models.ForeignKey(Note, on_delete=models.CASCADE)
     permission = models.ForeignKey(Permission, blank=True, null=True, on_delete=models.SET_NULL,
                                    help_text='actions that can be performed on a public scoped note')
+
+
+class ModelNoteField(GenericRelation):
+    def __init__(self, pk_indexable=True, delete_related=True, **kwargs):
+        kwargs['to'] = Note
+
+        if pk_indexable:
+            kwargs['object_id_field'] = 'object_id'
+        else:
+            kwargs['object_id_field'] = 'object_pk'
+
+        kwargs['content_type_field'] = 'content_type'
+        self.delete_related = delete_related
+        super(ModelNoteField, self).__init__(**kwargs)
+
+    def bulk_related_objects(self, objs, using=DEFAULT_DB_ALIAS):
+        if self.delete_related:
+            return super(ModelNoteField, self).bulk_related_objects(objs, using)
+        return []
 
 
 if 'auditlog' in settings.INSTALLED_APPS:

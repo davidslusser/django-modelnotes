@@ -1,11 +1,10 @@
 from django.conf import settings
-from django.shortcuts import render
-from django.views.generic import (ListView)
+from django.shortcuts import redirect, render, reverse
+from django.views.generic import (View, ListView)
 from django.db.models import Q
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from handyhelpers.mixins.view_mixins import FilterByQueryParamsMixin
-
 
 # import models
 from django.contrib.auth.models import Group
@@ -13,8 +12,9 @@ from modelnotes.models import Note, Permission
 
 
 class ListNotesBaseView(LoginRequiredMixin, FilterByQueryParamsMixin, ListView):
-    base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base_bs5.htm')
-    template = 'handyhelpers/generic/bs5/generic_list.html'
+    base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base.htm')
+    # base_template = getattr(settings, 'BASE_TEMPLATE', 'testproject/base.htm')
+    template = 'handyhelpers/generic/generic_list.html'
 
 
 class ListMyNotes(ListNotesBaseView):
@@ -55,7 +55,7 @@ class ListGroupNotes(ListNotesBaseView):
 
 
 class ListReadableNotes(ListNotesBaseView):
-    """ get modelnotes that current user can read:
+    """ get modelnotes user can read:
         - authored by user
         - with a scope of 'group' and authored by a member of a group user is also a member of
         - with a scope of 'public'

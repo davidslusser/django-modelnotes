@@ -41,8 +41,8 @@ def check_managability(user, note, action):
     return False
 
 
-class UpdateNote(LoginRequiredMixin, View):
-    """ update a note """
+class EditNote(LoginRequiredMixin, View):
+    """ edit a note """
     def post(self, request, *args, **kwargs):
         """ process POST request """
         obj_id = self.request.GET.dict().get('id', None)
