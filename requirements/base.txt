@@ -1,3 +1,0 @@
-django-auditlog
-django-braces
-django-handyhelpers
