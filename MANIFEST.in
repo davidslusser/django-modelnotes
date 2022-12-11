@@ -11,3 +11,7 @@ recursive-include src *
 # Exclude test files
 exclude manage.py
 recursive-exclude test *
+
+# Exclude local_project
+exclude src/local_projects
+exclude src/manage.py
