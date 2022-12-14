@@ -1,3 +1,7 @@
+<a href="#" title="create note" role="button" data-toggle="tooltip" data-placement="left" style="text-decoration: none"
+   onClick="CreateNote('{% url 'modelnotes:create_note' %}?model={{ row|label }}&id={{ row.id }}', 'Create Note: <small>{{ row }}</small> ', 'Create');">
+    <i class="fas fa-edit text-primary mx-1"></i>
+</a>
 <table class="table table-condensed table-bordered table-striped" data-toggle="table" data-search="true"
        data-flat="true" data-pagination="true" data-show-pagination-switch="true" data-show-columns="true"
        data-show-export="true" data-reorderable-columns="true" data-resizable="false" data-export-types="['excel','csv','txt','sql']">
@@ -6,9 +10,6 @@
             <th data-field="title" data-sortable="true">Title</th>
             <th data-field="author" data-sortable="true">Author</th>
             <th data-field="scope" data-sortable="true">Scope</th>
-            <th data-field="groups" data-sortable="true">Groups</th>
-            <th data-field="permissions" data-sortable="true">Permissions</th>
-            <th data-field="attached_to" data-sortable="true">Attached To</th>
             <th data-field="content" data-sortable="true">Content</th>
             <th data-field="updated_at" data-sortable="true">Updated At</th>
             <th>Actions</th>
@@ -20,10 +21,7 @@
             <td>{{ row.title }}</td>
             <td>{{ row.author }}</td>
             <td>{{ row.scope }}</td>
-            <td>{% for group in row.groups.all %}{{ group }}&nbsp; {% endfor %}</td>
-            <td>{% for permission in row.public_permissions.all %}{{ permission }}&nbsp; {% endfor %}</td>
-            <td>{{ row.content_type }}{% if row.object_repr %}: {{ row.object_repr }}{% endif %}</td>
-            <td>{{ row.content|truncatechars:32 }}</td>
+            <td>{{ row.content|truncatechars:64 }}</td>
             <td>{{ row.updated_at }}</td>
             {# actions #}
             <td>
@@ -44,7 +42,7 @@
                 <a href="#" title="view audit log"
                    onClick="showInfo('{% url "modelnotes:get_note_auditlog" %}', '{{ row.id }}', 'Audit Log: <small><i>{{ row.title }}</i></small>', 'xl');"
                    role="button" data-bs-toggle="tooltip" data-placement="left" style="text-decoration: none">
-                    <span class="mx-1 hvr-grow"><i class="fa fa-history fa-fw"></i></span>
+                    <span class="mx-1 hvr-grow"><i class="fa fa-history fa-fw mx-1"></i></span>
                 </a>
 
                 <!-- update note -->
@@ -63,5 +61,6 @@
     {% endfor %}
     </tbody>
 </table>
+
 {% include 'handyhelpers/component/clipboard.htm' %}
-{% include 'handyhelpers/component/bs5/modals.htm' %}
+{% include 'modelnotes/form/create_note.htm' %}

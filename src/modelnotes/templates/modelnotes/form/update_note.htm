@@ -164,7 +164,7 @@
                                 </div>
                                 <div class="col-sm-9 col-md-10">
                                     <select class="form-control" id="groups" multiple="multiple">
-                                        {% for group in groups %}
+                                        {% for group in request.user.groups.all %}
                                         <option value="{{ group.name }}">{{ group.name }}</option>
                                         {% endfor %}
                                     </select>

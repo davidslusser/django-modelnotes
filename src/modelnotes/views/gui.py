@@ -29,7 +29,7 @@ class ListMyNotes(ListNotesBaseView):
         context['title'] = 'Notes'
         context['subtitle'] = request.user.username
         context['table'] = 'modelnotes/table/list_notes.htm'
-        context['modals'] = 'modelnotes/form/edit_note.htm'
+        context['modals'] = 'modelnotes/form/update_note.htm'
         context['groups'] = Group.objects.all()
         context['permissions'] = Permission.objects.all()
         return render(request, self.template, context=context)
@@ -48,7 +48,7 @@ class ListGroupNotes(ListNotesBaseView):
         context['title'] = 'Notes'
         context['subtitle'] = request.user.username + '\'s groups'
         context['table'] = 'modelnotes/table/list_notes.htm'
-        context['modals'] = 'modelnotes/form/edit_note.htm'
+        context['modals'] = 'modelnotes/form/update_note.htm'
         context['groups'] = Group.objects.all()
         context['permissions'] = Permission.objects.all()
         return render(request, self.template, context=context)
@@ -74,7 +74,7 @@ class ListReadableNotes(ListNotesBaseView):
         context['title'] = 'Notes'
         context['subtitle'] = None
         context['table'] = 'modelnotes/table/list_notes.htm'
-        context['modals'] = 'modelnotes/form/edit_note.htm'
+        context['modals'] = 'modelnotes/form/update_note.htm'
         context['groups'] = Group.objects.all()
         context['permissions'] = Permission.objects.all()
         return render(request, self.template, context=context)
@@ -92,7 +92,7 @@ class ListAllNotes(ListNotesBaseView, SuperuserRequiredMixin):
         context['title'] = 'Notes'
         context['subtitle'] = 'all modelnotes'
         context['table'] = 'modelnotes/table/list_notes.htm'
-        context['modals'] = 'modelnotes/form/edit_note.htm'
+        context['modals'] = 'modelnotes/form/update_note.htm'
         context['groups'] = Group.objects.all()
         context['permissions'] = Permission.objects.all()
         return render(request, self.template, context=context)

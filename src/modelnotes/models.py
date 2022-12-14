@@ -100,11 +100,12 @@ class Note(HandyHelperBaseModel):
     def set_read_permission(self):
         """ automatically add the 'read' permission if scope is set to 'public' """
         # https://www.py4u.net/discuss/204721
-        if self.scope.name == 'public':
-            self.public_permissions.add(Permission.objects.get_or_create(name='read')[0])
+        if self.scope and self.scope.name == 'public':
+                self.public_permissions.add(Permission.objects.get_or_create(name='read')[0])
 
-    def save(self):
-        super(Note, self).save()
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Note, self).save(*args, **kwargs)
         self.set_read_permission()
 
     def __str__(self):

@@ -1,7 +1,10 @@
-from django.shortcuts import redirect
+from django.apps import apps
 from django.contrib import messages
+from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import redirect
 from django.views.generic import View, DeleteView
 from braces.views import LoginRequiredMixin
+
 
 # import models
 from django.contrib.auth.models import Group
@@ -26,7 +29,7 @@ def check_managability(user, note, action):
         True if this note can be managed by the provided user
         False if this note can not be managed by the provided user
     """
-    if action not in 'editdelete':
+    if action not in 'readeditdelete':
         return False
     if user.is_superuser:
         return True
@@ -39,6 +42,51 @@ def check_managability(user, note, action):
     if note.scope.name == 'public' and action in [i.name for i in note.public_permissions.all()]:
         return True
     return False
+
+
+class CreateNote(LoginRequiredMixin, View):
+    """ create a note """
+    def post(self, request, *args, **kwargs):
+        """ process POST request """
+        label = self.request.GET.dict().get('model', None)
+        obj_id = self.request.GET.dict().get('id', None)
+        title = self.request.GET.dict().get('title', None)
+        scope_name = self.request.GET.dict().get('scope', None)
+        groups = self.request.GET.dict().get('groups', None)
+        permissions = self.request.GET.dict().get('permissions', None)
+        content = self.request.GET.dict().get('content', None)
+
+        try:
+            if scope_name:
+                scope = Scope.objects.get(name=scope_name)
+            else:
+                scope = None
+            note = Note.objects.create(
+                title=title,
+                author=request.user,
+                scope=scope,
+                content=content,
+                content_type=ContentType.objects.get(app_label=label.split('.')[0], model=label.split('.')[1]),
+                object_id=obj_id,
+            )
+
+            if scope.name == 'group':
+                group_list = Group.objects.filter(name__in=groups.split(','))
+                for group in group_list:
+                    if group not in note.groups.all():
+                        note.groups.add(group)
+
+            elif scope.name == 'public':
+                permission_list = Permission.objects.filter(name__in=permissions.split(','))
+                for permission in permission_list:
+                    if permission not in note.public_permissions.all():
+                        note.public_permissions.add(permission)
+
+            messages.add_message(self.request, messages.INFO, f'note {note} successfully created',
+                                 extra_tags='alert-info')
+        except Exception as err:
+            messages.add_message(request, messages.ERROR, str(err), extra_tags='alert-danger')
+        return redirect(self.request.META.get('HTTP_REFERER'))
 
 
 class UpdateNote(LoginRequiredMixin, View):
