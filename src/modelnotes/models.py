@@ -103,6 +103,21 @@ class Note(HandyHelperBaseModel):
         if self.scope and self.scope.name == 'public':
                 self.public_permissions.add(Permission.objects.get_or_create(name='read')[0])
 
+    def get_icon(self):
+        """ get a fontawesome icon based on the scope to use in the gui """
+        icon_map = {
+            'group': '<i class="fa-solid fa-people-group"></i>',
+            'private': '<i class="fa-solid fa-user-secret"></i>',
+            'public': '<i class="fa-solid fa-lock-open"></i>',
+        }
+        try:
+             if self.scope.name in icon_map:
+                return icon_map[self.scope.name]
+             else:
+                return '<i class="fas fa-file"></i>'
+        except Exception as err:
+            return '<i class="fa-regular fa-note-sticky"></i>'
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super(Note, self).save(*args, **kwargs)
