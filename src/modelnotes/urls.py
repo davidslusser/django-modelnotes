@@ -24,5 +24,7 @@ urlpatterns = [
 
     # htmx views
     path('get_scope_fields/', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
+    path('get_scope_fields/<int:pk>', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
+    path('build_edit_note_modal/', htmx.BuildEditNoteModal.as_view(), name='build_edit_note_modal'),
 
 ]

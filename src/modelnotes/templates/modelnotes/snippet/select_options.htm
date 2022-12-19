@@ -5,7 +5,7 @@
 <div class="col-sm-9 col-md-10">
     <select class="form-control" id="{{ select_id }}" {% if multiple %}multiple="multiple"{% endif %}>
         {% for option in option_list %}
-        <option value="{{ option.name }}">{{ option.name }}</option>
+        <option value="{{ option.name }}" {% if option in selected_list %}selected{% endif %}>{{ option.name }}</option>
         {% endfor %}
     </select>
 </div>

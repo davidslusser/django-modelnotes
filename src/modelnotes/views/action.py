@@ -134,7 +134,8 @@ class UpdateNote(LoginRequiredMixin, View):
                             note.public_permissions.remove(permission)
 
                 note.save()
-                messages.add_message(self.request, messages.INFO, 'note successfully updated', extra_tags='alert-info')
+                messages.add_message(self.request, messages.INFO, f'note {note} successfully updated',
+                                     extra_tags='alert-info')
             else:
                 messages.add_message(self.request, messages.ERROR, f'This note can not be updated by {request.user}',
                                      extra_tags='alert-danger')
