@@ -36,10 +36,10 @@
         <div class="mt-2 row text-left" id="id_update_select_options">
             {% if object.scope.name == "public" %}
             <div class="col-sm-3 col-md-2">
-                <label class="control-label" for="permissions"><b>Permissions:</b></label>
+                <label class="control-label" for="update_permissions"><b>Permissions:</b></label>
             </div>
             <div class="col-sm-9 col-md-10">
-                <select class="form-control" id="permissions" multiple="multiple">
+                <select class="form-control" id="update_permissions" multiple="multiple">
                     {% for permission in permissions %}
                     <option value="{{ permission.name }}" {% if permission in object.public_permissions.all %}selected{% endif %}>{{ permission.name }}</option>
                     {% endfor %}
@@ -47,10 +47,10 @@
             </div>
             {% elif object.scope.name == "group" %}
             <div class="col-sm-3 col-md-2">
-                <label class="control-label" for="groups"><b>Groups:</b></label>
+                <label class="control-label" for="update_groups"><b>Groups:</b></label>
             </div>
             <div class="col-sm-9 col-md-10">
-                <select class="form-control" id="groups" multiple="multiple">
+                <select class="form-control" id="update_groups" multiple="multiple">
                     {% for group in request.user.groups.all %}
                     <option value="{{ group.name }}" {% if group in object.groups.all %}selected{% endif %}>{{ group.name }}</option>
                     {% endfor %}

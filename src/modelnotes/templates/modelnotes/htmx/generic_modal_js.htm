@@ -1,0 +1,23 @@
+<script type="text/javascript">
+    ;(function () {
+
+        htmx.on("htmx:afterSwap", (e) => {
+            // Response targeting #dialog => show the modal
+            if (e.detail.target.id == "{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper") {
+            const {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %} = new bootstrap.Modal(document.getElementById("{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}"))
+            {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}.show()
+            }
+        })
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            // Empty response targeting #dialog => hide the modal
+            if (e.detail.target.id == "{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper" && !e.detail.xhr.response) {
+            const {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %} = new bootstrap.Modal(document.getElementById("{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}"))
+            {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}.hide()
+            e.detail.shouldSwap = false
+            document.getElementById("{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper").innerHTML = ""
+            }
+        })
+
+    })()
+</script>

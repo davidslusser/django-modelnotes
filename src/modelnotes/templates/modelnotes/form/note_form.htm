@@ -1,0 +1,33 @@
+<div class="mt-2 row text-left">
+    <div class="col-sm-3 col-md-2">
+        <label class="control-label" for="id_title"><b>Title:</b></label>
+    </div>
+    <div class="col-sm-9 col-md-10">
+        <input type="text" name="title" value="{{ object.title }}" maxlength="32" placeholder="title for your note" class="form-control" required="" id="id_title">
+    </div>
+</div>
+<div class="mt-2 row text-left">
+    <div class="col-sm-3 col-md-2">
+        <label class="control-label" for="id_content"><b>Content:</b></label>
+    </div>
+    <div class="col-sm-9 col-md-10">
+        <textarea name="content" cols="40" rows="5" class="form-control" required="" id="id_content">{{ object.content }}</textarea>
+    </div>
+</div>
+<div class="mt-2 row text-left">
+    <div class="col-sm-3 col-md-2">
+        <label class="control-label" for="id_scope"><b>Scope:</b></label>
+    </div>
+    <div class="col-sm-9 col-md-10">
+        <select name="scope" class="form-control" id="id_scope"
+            hx-trigger="load, change"
+            hx-get="{% if object %}{% url 'modelnotes:get_scope_fields' object.id %}{% else %}{% url 'modelnotes:get_scope_fields' %}{% endif %}"
+            hx-target="#id_select_options">
+            <option value="">---------</option>
+            <option value="1" {% if object.scope.name == "private" %}selected {% endif %}>private</option>
+            <option value="2" {% if object.scope.name == "group" %}selected {% endif %}>group</option>
+            <option value="3" {% if object.scope.name == "public" %}selected {% endif %}>public</option>
+        </select>
+    </div>
+</div>
+<div id="id_select_options"></div>

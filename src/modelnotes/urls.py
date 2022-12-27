@@ -14,17 +14,24 @@ urlpatterns = [
     path('list_all_notes/', gui.ListAllNotes.as_view(), name='list_all_notes'),
 
     # action views
-    path('create_note/', action.CreateNote.as_view(), name='create_note'),
-    path('update_note/', action.UpdateNote.as_view(), name='update_note'),
-    path('delete_note/<int:pk>', action.DeleteNote.as_view(), name='delete_note'),
+    # path('create_note/', action.CreateNote.as_view(), name='create_note'),
+    # path('update_note/', action.UpdateNote.as_view(), name='update_note'),
+    # path('delete_note/<int:pk>', action.DeleteNote.as_view(), name='delete_note'),
 
     # ajax views
     path('get_note_details', ajax.get_note_details, name='get_note_details'),
     path('get_note_auditlog', ajax.get_note_auditlog, name='get_note_auditlog'),
 
     # htmx views
+    # path('get_scope_fields/', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
+    # path('get_scope_fields/<int:pk>', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
+    # path('build_edit_note_modal/', htmx.BuildEditNoteModal.as_view(), name='build_edit_note_modal'),
+
+    path('create_note', htmx.CreateNote.as_view(), name='create_note'),
+    path('retrieve_notes', htmx.RetrieveNotes.as_view(), name='retrieve_notes'),
+    path('update_note/<int:pk>/', htmx.UpdateNote.as_view(), name='update_note'),
+    path('delete_note/<int:pk>/', htmx.DeleteNote.as_view(), name='delete_note'),
     path('get_scope_fields/', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
     path('get_scope_fields/<int:pk>', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
-    path('build_edit_note_modal/', htmx.BuildEditNoteModal.as_view(), name='build_edit_note_modal'),
 
 ]

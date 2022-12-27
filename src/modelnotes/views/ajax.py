@@ -26,11 +26,11 @@ def get_note_details(request):
     if (request.is_ajax()) and (request.method == 'GET'):
         if 'client_response' in request.GET:
             object_id = request.GET['client_response']
-            obj = Note.objects.get(id=object_id)
-            if not check_managability(request.user, obj, 'read'):
+            instance = Note.objects.get(id=object_id)
+            if not check_managability(request.user, instance, 'read'):
                 return HttpResponse('Insufficient permissions', status=403)
             template = loader.get_template('modelnotes/ajax/detail_note.htm')
-            return HttpResponse(json.dumps({'server_response': template.render({'object': obj})}),
+            return HttpResponse(json.dumps({'server_response': template.render({'object': instance})}),
                                 content_type='application/javascript')
         else:
             return HttpResponse('Invalid request inputs', status=400)
@@ -52,9 +52,12 @@ def get_note_auditlog(request):
         if 'auditlog' not in settings.INSTALLED_APPS:
             return HttpResponse('auditlog is not installed', status=400)
         if 'client_response' in request.GET:
-            obj_id = request.GET['client_response']
+            object_id = request.GET['client_response']
+            instance = Note.objects.get(id=object_id)
+            if not check_managability(request.user, instance, 'read'):
+                return HttpResponse('Insufficient permissions', status=403)
             queryset = LogEntry.objects.filter(content_type__model='note',
-                                               object_id=obj_id)
+                                               object_id=object_id)
             template = loader.get_template('handyhelpers/ajax/show_audit_log.htm')
             return HttpResponse(json.dumps({'server_response': template.render({'queryset': queryset})}),
                                 content_type='application/javascript')

@@ -1,0 +1,23 @@
+    <table class="table">
+    <thead>
+        <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Scope</th>
+        <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for note in note_list %}
+        <tr id="note_{{ note.pk }}">
+        <td>{{ note.title }}</td>
+        <td>{{ note.author }}</td>
+        <td>{{ note.scope }}</td>
+        <td>
+            <button class="btn btn-primary btn-sm" hx-get="{% url 'htmx:update_note' pk=note.pk %}" hx-target="#note_modal_dialog">Edit</button>
+            <button class="btn btn-danger btn-sm" hx-get="{% url 'htmx:delete_note' pk=note.pk %}" hx-target="#{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper">Delete</button>
+        </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>

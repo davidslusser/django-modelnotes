@@ -5,12 +5,25 @@ from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+
 from handyhelpers.models import HandyHelperBaseModel
+from handyhelpers.managers import HandyHelperModelManager
+
+from modelnotes.helpers import get_readable_notes
 
 
 if 'auditlog' in settings.INSTALLED_APPS:
     from auditlog.registry import auditlog
     from auditlog.models import AuditlogHistoryField
+
+
+class ReadableNotesManager(HandyHelperModelManager):
+
+    def readable_notes(self, *args, **kwargs):
+        user = kwargs.get('user', None)
+        if not user:
+            return Note.objects.none()
+        return get_readable_notes(user=user)
 
 
 def get_default_scope():
@@ -52,15 +65,15 @@ class Note(HandyHelperBaseModel):
     title = models.CharField(max_length=32, help_text='title for this note')
     author = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL,
                                help_text='user who created this note')
-    scope = models.ForeignKey(Scope, blank=True, null=True, default=get_default_scope,
-                              on_delete=models.SET_NULL, help_text='sets access to this note')
+    scope = models.ForeignKey(Scope, blank=True, default=get_default_scope,
+                              on_delete=get_default_scope, help_text='sets access to this note')
     public_permissions = models.ManyToManyField(Permission, blank=True, through='PublicPermission',
                                                 help_text='indicated actions that can be performed on this note when '
                                                           'scope is set to public')
     groups = models.ManyToManyField(Group, blank=True, through='GroupPermission')
     content = models.TextField(help_text='the actual content of this note')
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, blank=True, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField(blank=True)
     object_repr = models.CharField(max_length=128, blank=True, null=True,
                                    help_text='string representation of an object instance')
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -72,16 +85,24 @@ class Note(HandyHelperBaseModel):
         def verify_object_instance_exists():
             """ Check that the instance of an object, as identified by object_id, exists. If not, do not allow
             note to be attached. """
-            try:
-                content_type_object = ContentType.objects.get(id=self.content_type_id)
-                model_class = apps.get_model(app_label=content_type_object.app_label,
-                                             model_name=content_type_object.model)
-            except Exception as err:
-                raise ValidationError({'object_id': f'Failed to attach note: {err}'})
-            try:
-                model_class.objects.get(id=self.object_id)
-            except model_class.DoesNotExist:
-                raise ValidationError({'object_id': 'Can not attach a note to an instance that does not exists'})
+            print('TEST: in verify_object_instance_exists()')
+            if getattr(self, 'content_type', None) and getattr(self, 'object_id', None):
+                print('TEST: need to check content...')
+                print('TEST: ct = ', self.content_type)
+                print('TEST: oi = ', self.object_id)
+                try:
+                    # print('TEST: (Note clean)', self.content_type.id)
+                    content_type_object = ContentType.objects.get(id=self.content_type.id)
+                    model_class = apps.get_model(app_label=content_type_object.app_label,
+                                                 model_name=content_type_object.model)
+                except Exception as err:
+                    raise ValidationError({'object_id': f'Failed to attach note: {err}'})
+                try:
+                    model_class.objects.get(id=self.object_id)
+                except model_class.DoesNotExist:
+                    raise ValidationError({'object_id': 'Can not attach a note to an instance that does not exists'})
+
+
 
         def set_obj_repr():
             """ set the object_repr """

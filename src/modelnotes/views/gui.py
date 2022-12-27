@@ -54,12 +54,17 @@ class ListGroupNotes(ListNotesBaseView):
         return render(request, self.template, context=context)
 
 
-class ListReadableNotes(ListNotesBaseView):
+# class ListReadableNotes(ListNotesBaseView):
+class ListReadableNotes(ListView):
     """ get modelnotes that current user can read:
         - authored by user
         - with a scope of 'group' and authored by a member of a group user is also a member of
         - with a scope of 'public'
     """
+    base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base_bs5.htm')
+    template_name = 'modelnotes/generic_htmx_list.html'
+    model = Note
+
     def get(self, request, *args, **kwargs):
         context = dict()
         self.queryset = Note.objects.filter(
@@ -70,14 +75,33 @@ class ListReadableNotes(ListNotesBaseView):
             select_related('author', 'scope', 'content_type'). \
             prefetch_related('public_permissions', 'groups', 'content_object')
         context['base_template'] = self.base_template
-        context['queryset'] = self.filter_by_query_params()
+        # context['queryset'] = self.filter_by_query_params()
         context['title'] = 'Notes'
-        context['subtitle'] = None
-        context['table'] = 'modelnotes/table/list_notes.htm'
-        context['modals'] = 'modelnotes/form/update_note.htm'
-        context['groups'] = Group.objects.all()
-        context['permissions'] = Permission.objects.all()
-        return render(request, self.template, context=context)
+        context['subtitle'] = 'test!'
+        # context['table'] = 'modelnotes/table/list_notes.htm'
+        # context['modals'] = 'modelnotes/form/update_note.htm'
+        # context['groups'] = Group.objects.all()
+        # context['permissions'] = Permission.objects.all()
+        return render(request, self.template_name, context=context)
+
+    # def get(self, request, *args, **kwargs):
+    #     context = dict()
+    #     self.queryset = Note.objects.filter(
+    #         Q(author=request.user) |
+    #         Q(groups__user=request.user, scope__name='group') |
+    #         Q(scope__name='public')
+    #     ).distinct().order_by('-updated_at'). \
+    #         select_related('author', 'scope', 'content_type'). \
+    #         prefetch_related('public_permissions', 'groups', 'content_object')
+    #     context['base_template'] = self.base_template
+    #     context['queryset'] = self.filter_by_query_params()
+    #     context['title'] = 'Notes'
+    #     context['subtitle'] = None
+    #     context['table'] = 'modelnotes/table/list_notes.htm'
+    #     context['modals'] = 'modelnotes/form/update_note.htm'
+    #     context['groups'] = Group.objects.all()
+    #     context['permissions'] = Permission.objects.all()
+    #     return render(request, self.template, context=context)
 
 
 class ListAllNotes(ListNotesBaseView, SuperuserRequiredMixin):
