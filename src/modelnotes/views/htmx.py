@@ -9,6 +9,7 @@ from modelnotes.models import Note, Permission
 
 from modelnotes.views.action import check_managability
 from modelnotes.forms import NoteForm
+from modelnotes.helpers import get_all_notes
 
 class GetScopeFields(View):
     """ get groups or permissions based on scope and build dropdown for create/edit modelnote form """
@@ -54,61 +55,48 @@ class GetScopeFields(View):
         return render(request, template_name='modelnotes/snippet/select_options.htm', context=context)
 
 
-class BuildEditNoteModal(View):
-    """ get groups or permissions based on scope and build dropdown for create/edit modelnote form """
-    def get(self, request, *args, **kwargs):
-        context = dict()
-        instance_id = request.GET.get('id', None)
-        instance = Note.objects.get_object_or_none(id=instance_id)
-        if instance:
-            context['object'] = instance
-            if not check_managability(request.user, instance, 'edit'):
-                context['object'] = None
-                context['message'] = f'{request.user} is not authorized to update this note'
-        else:
-            context['object'] = None
-        context['permissions'] = Permission.objects.all()
-        return render(request, template_name='modelnotes/snippet/edit_modal.htm', context=context)
-
-
-
-#########
-
 class CreateNote(View):
     """
-    ** need to get the model name and object_id; probably best to add to the url '{% url 'modelnotes:create_note' %}?model={{ object|label }}&id={{ object.id }}'
+    Create a Note instance via htmx. The Get method builds the form and modal. The post method creates the
+    instance and triggers a confirmation via Bootstrap toast.
+
+    Example usage in a template:
+        <a href="#" hx-get="{% url 'modelnotes:create_note' %}?model_label={{ row|label }}&object_id={{ object.id }}" hx-target="#create_update_modal_wrapper">
+            add note
+        </a>
+
+    To utilize the create form and modal, the modal, modal wrapper, and javascript for controlling the modal must be
+    included in your template. It should look something like this:
+        <div id="create_update_modal_wrapper">
+        {% with 'create_update_modal' as modal_id %}
+        {% include 'modelnotes/htmx/generic_modal.htm' %}
+        {% include 'modelnotes/htmx/generic_modal_js.htm' %}
+        {% endwith %}
+        </div>
     """
     model = Note
     form = NoteForm
-    form_template = 'modelnotes/form/note_form.htm'
-    template_name = 'modelnotes/htmx/generic_modal.htm'
-
-    """ create a note """
+    form_template = 'modelnotes/form/note_form.htm' # this is the template for the note form
+    template_name = 'modelnotes/htmx/generic_modal.htm' # this is the template for the modal that houses the form
 
     def post(self, request, *args, **kwargs):
-        print('in CreateNote post()')
-
-        print(request.GET)
-        print(request.POST)
+        """ create a Note instance and confirm update via Bootstrap 'toast' """
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
 
         nodel_label = self.request.GET.dict().get('model_label', None)
         object_id = self.request.GET.dict().get('object_id', None)
         app, model_name = nodel_label.split('.')
-        print(app, model_name)
 
         form = self.form(request.POST)
         context = dict()
         context['form'] = form
 
         if form.is_valid():
-            print('TEST: groups = ', getattr(form.cleaned_data, 'groups', None))
-            print(form.data)
-            print(form.cleaned_data)
             instance = form.save(commit=False)
             instance.author = request.user
             instance.content_type = ContentType.objects.get(app_label=app,
                                                             model=model_name)
-            ContentType.objects.get(app_label='test_app', model='order')
             instance.object_id = int(object_id)
             instance.save()
             form.save_m2m()
@@ -117,17 +105,15 @@ class CreateNote(View):
                 headers={
                     'HX-Trigger': json.dumps({
                         "instanceListChanged": None,
-                        "showMessage": f"{instance} created"
+                        "showSuccess": f"{instance} created"
                     })
                 })
-        else:
-            print('ERROR: form is not valid')
-            print(form.errors)
         return render(request, self.template_name, context)
 
     def get(self, request, *args, **kwargs):
-        print('in CreateNote get()')
-        print(request.GET)
+        """ construct the modal content required for creating a new note """
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
         model_label = self.request.GET.dict().get('model_label', None)
         object_id = self.request.GET.dict().get('object_id', None)
 
@@ -144,31 +130,92 @@ class CreateNote(View):
 
 
 class RetrieveNotes(ListView):
-    model = Note
-    template_name = "modelnotes/table/list_notes_two.htm"
+    """ List view used to dynamically get a list ot Note instances via htmx
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    Example usage in a template:
+        <div hx-trigger="load, instanceListChanged from:body"
+             hx-get="{% url 'modelnotes:retrieve_notes' %}" hx-target="this">
+        </div>
+
+    To include create option (via Bootstrap modal) include something like in your template:
+        <a href="#" hx-get="{% url 'modelnotes:create_note' %}" hx-target="#create_update_modal_wrapper">
+            <i class="fas fa-add"></i>
+        </a>
+
+    To include create/update and/or delete confirmation modals include the following in your template:
+        <!-- wrapper for the create/update note form modal -->
+        <div id="create_update_modal_wrapper">
+        {% with 'create_update_modal' as modal_id %}
+        {% include 'modelnotes/htmx/generic_modal.htm' %}
+        {% include 'modelnotes/htmx/generic_modal_js.htm' %}
+        {% endwith %}
+        </div>
+
+        <!-- wrapper for the delete confirmation modal -->
+        <div id="delete_confirmation_modal_wrapper">
+        {% with 'delete_confirmation_modal' as modal_id %}
+        {% include 'modelnotes/htmx/generic_modal.htm' %}
+        {% include 'modelnotes/htmx/generic_modal_js.htm' %}
+        {% endwith %}
+        </div>
+    """
+    model = Note
+    template_name = 'modelnotes/table/list_notes.htm'
+
+    def get(self, request, *args, **kwargs):
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
+        context = dict()
         context['delete_modal_id'] = 'delete_confirmation_modal'
         context['create_update_modal_id'] = 'create_update_modal'
-        return context
+        context['note_list'] = get_all_notes(request.user)
+        return render(request, self.template_name, context=context)
 
 
 class UpdateNote(View):
-    """ update a note """
+    """
+    Update a Note instance via htmx. The Get method creates the update form and modal. The post method updates the
+    instance and triggers a confirmation via Bootstrap toast.
+
+    Example usage in a template:
+        <a href="#" hx-get="{% url 'modelnotes:update_note' pk=object.pk %}" hx-target="#{% if create_update_modal_id %}{{ create_update_modal_id }}{% else %}create_update_modal_id{% endif %}_wrapper">
+            <i class="fas fa-edit"></i>
+        </a>
+
+    To utilize the update form and modal, the modal, modal wrapper, and javascript for controlling the modal must be
+    included in your template. It should look something like this:
+        <div id="create_update_modal_wrapper">
+        {% with 'create_update_modal' as modal_id %}
+        {% include 'modelnotes/htmx/generic_modal.htm' %}
+        {% include 'modelnotes/htmx/generic_modal_js.htm' %}
+        {% endwith %}
+        </div>
+    """
     model = Note
     form = NoteForm
-    form_template = 'modelnotes/form/note_form.htm'
-    template_name = 'modelnotes/htmx/generic_modal.htm'
+    form_template = 'modelnotes/form/note_form.htm' # this is the template for the note form
+    template_name = 'modelnotes/htmx/generic_modal.htm' # this is the template for the modal that houses the form
 
     def post(self, request, *args, **kwargs):
-        print('TEST: in UpdateNote post()')
-        note = get_object_or_404(Note, **kwargs)
-        form = self.form(request.POST, instance=note)
+        """ update a Note instance and confirm update via Bootstrap 'toast' """
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
+        instance = get_object_or_404(Note, *args, **kwargs)
+        if not check_managability(request.user, instance, 'delete'):
+            return HttpResponse(
+                status=403,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        'instanceListChanged': None,
+                        'showError': f'{request.user} can not update {instance}'
+                    })
+                })
+
+        form = self.form(request.POST, instance=instance)
         context = dict()
         context['form'] = form
         context['action'] = 'Update'
-        context['object'] = note
+        context['object'] = instance
         context['path'] = f'/modelnotes/update_note/{kwargs["pk"]}/'
         if form.is_valid():
             note = form.save(commit=False)
@@ -178,17 +225,17 @@ class UpdateNote(View):
                 status=204,
                 headers={
                     'HX-Trigger': json.dumps({
-                        "instanceListChanged": None,
-                        "showMessage": f"{note.title} updated"
+                        'instanceListChanged': None,
+                        'showSuccess': f'{instance.title} updated'
                     })
                 })
-        else:
-            print('ERROR: form is not valid')
-            print(form.errors)
         return render(request, 'modelnotes/form/note_form.htm', context)
 
     def get(self, request, *args, **kwargs):
-        instance = get_object_or_404(self.model, **kwargs)
+        """ build the modal and form used for editing an existing instance of a Note """
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
+        instance = get_object_or_404(self.model, *args, **kwargs)
         form = self.form(instance=instance)
         context = dict()
         context['object'] = instance
@@ -202,31 +249,69 @@ class UpdateNote(View):
 
 
 class DeleteNote(View):
+    """
+    Delete a Note instance via htmx. The Get method creates a confirmation modal. The delete method deletes the
+    instance and triggers a confirmation via Bootstrap toast.
+
+    Example usage in a template:
+        <a href="#"
+            hx-get="{% url 'modelnotes:delete_note' pk=note.pk %}"
+            hx-target="#{% if delete_modal_id %}{{ delete_modal_id }}{% else %}id_delete_modal{% endif %}_wrapper">
+            <i class="fas fa-trash"></i>
+        </a>
+
+    To utilize the delete confirmation, the modal, modal wrapper, and javascript for controlling the modal must be
+    included in your template. It should look something like this:
+        <!-- wrapper for the delete confirmation modal -->
+        <div id="delete_confirmation_modal_wrapper">
+        {% with 'delete_confirmation_modal' as modal_id %}
+        {% include 'modelnotes/htmx/generic_modal.htm' %}
+        {% include 'modelnotes/htmx/generic_modal_js.htm' %}
+        {% endwith %}
+        </div>
+
+    """
     model = Note
     template_name = 'modelnotes/htmx/generic_modal.htm'
 
     def delete(self, request, *args, **kwargs):
-        instance = get_object_or_404(self.model, **kwargs)
-        # instance.delete()
+        """ delete a Note instance and confirm delete via Bootstrap 'toast' """
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
+
+        instance = get_object_or_404(self.model, *args, **kwargs)
+        if not check_managability(request.user, instance, 'delete'):
+            return HttpResponse(
+                status=403,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        'instanceListChanged': None,
+                        'showError': f'{request.user} can not delete {instance}'
+                    })
+                })
+        instance.delete()
 
         return HttpResponse(
             status=204,
             headers={
                 'HX-Trigger': json.dumps({
-                    "instanceListChanged": None,
-                    "showMessage": f"{instance} deleted"
+                    'instanceListChanged': None,
+                    'showSuccess': f'{instance} deleted'
                 })
             })
 
     def get(self, request, *args, **kwargs):
-        instance = get_object_or_404(self.model, **kwargs)
+        """ build modal for confirming delete of a Note instance """
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
+
+        instance = get_object_or_404(self.model, *args, **kwargs)
         context = dict()
         request.htmx_method = 'hx-delete'
         context['modal_id'] = 'delete_confirmation_modal'
         context['modal_size'] = 'modal-md'
         context['modal_action'] = 'Delete'
         context['modal_title'] = f'Delete Note: <span class="font-italic text-secondary">{instance}</span>'
-        context[
-            'modal_body'] = f'<span class="font-italic text-secondary">{instance}</span> will be permanently deleted. Do you wish to continue?'
+        context['modal_body'] = f'<span class="font-italic text-secondary">{instance}</span> will be permanently ' \
+                                f'deleted. Do you wish to continue?'
         return render(request, self.template_name, context)
-

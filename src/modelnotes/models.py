@@ -85,13 +85,8 @@ class Note(HandyHelperBaseModel):
         def verify_object_instance_exists():
             """ Check that the instance of an object, as identified by object_id, exists. If not, do not allow
             note to be attached. """
-            print('TEST: in verify_object_instance_exists()')
             if getattr(self, 'content_type', None) and getattr(self, 'object_id', None):
-                print('TEST: need to check content...')
-                print('TEST: ct = ', self.content_type)
-                print('TEST: oi = ', self.object_id)
                 try:
-                    # print('TEST: (Note clean)', self.content_type.id)
                     content_type_object = ContentType.objects.get(id=self.content_type.id)
                     model_class = apps.get_model(app_label=content_type_object.app_label,
                                                  model_name=content_type_object.model)
@@ -101,8 +96,6 @@ class Note(HandyHelperBaseModel):
                     model_class.objects.get(id=self.object_id)
                 except model_class.DoesNotExist:
                     raise ValidationError({'object_id': 'Can not attach a note to an instance that does not exists'})
-
-
 
         def set_obj_repr():
             """ set the object_repr """

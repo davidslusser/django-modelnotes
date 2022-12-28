@@ -1,43 +1,41 @@
-{% comment %} <div id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper"> {% endcomment %}
-    <div class="modal fade" tabindex="-1" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}">
-        <div class="modal-dialog {% if modal_size %}{{ modal_size }}{% endif %}" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_dialog">
-            {% if form %}
-            <form hx-post="{% if hx_post %}{{ hx_post }}{% else %}{{ request.path }}{% endif %}"
-                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
-                  class="modal-content">
-            {% else %}
-            <div class="modal-content" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_content">
-            {% endif %}
-                <div class="modal-header">
-                    <h5 class="modal-title">{% if modal_title %}{{ modal_title|safe }}{% else %}{% endif %}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_body">
-                {% if form %}
-                    {% if form_template %}
-                        {% include form_template %}
-                    {% else %}
-                        {{ form.as_p }}
-                    {% endif %}
-                {% else %}
-                    {% if modal_body %}{{ modal_body|safe }}{% endif %}
-                {% endif %}
-                </div>
-                <div class="modal-footer" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_close">Close</button>
-                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_submit"
-                    {% if not form %}
-                    {{ request.htmx_method }}="{{ request.path }}"
-                    hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
-                    id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_submit"
-                    {% endif %}
-                    >{% if modal_action %}{{ modal_action }}{% else %}Submit{% endif %}</button>
-                </div>
-            {% if form %}
-            </form>
-            {% else %}
+<div class="modal fade" tabindex="-1" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}">
+    <div class="modal-dialog {% if modal_size %}{{ modal_size }}{% endif %}" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_dialog">
+        {% if form %}
+        <form hx-post="{% if hx_post %}{{ hx_post }}{% else %}{{ request.path }}{% endif %}"
+              hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+              class="modal-content">
+        {% else %}
+        <div class="modal-content" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_content">
+        {% endif %}
+            <div class="modal-header">
+                <h5 class="modal-title">{% if modal_title %}{{ modal_title|safe }}{% else %}{% endif %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <div class="modal-body" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_body">
+            {% if form %}
+                {% if form_template %}
+                    {% include form_template %}
+                {% else %}
+                    {{ form.as_p }}
+                {% endif %}
+            {% else %}
+                {% if modal_body %}{{ modal_body|safe }}{% endif %}
             {% endif %}
+            </div>
+            <div class="modal-footer" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_close">Close</button>
+                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_submit"
+                {% if not form %}
+                {{ request.htmx_method }}="{{ request.path }}"
+                hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_submit"
+                {% endif %}
+                >{% if modal_action %}{{ modal_action }}{% else %}Submit{% endif %}</button>
+            </div>
+        {% if form %}
+        </form>
+        {% else %}
         </div>
+        {% endif %}
     </div>
-{% comment %} </div> {% endcomment %}
+</div>

@@ -43,10 +43,8 @@
         {% endcomment %}
 
     <!-- wrapper for the table (will be dynamically loaded via htmx) -->
-<!--    <div hx-trigger="load, instanceListChanged from:body" hx-get="{% url 'modelnotes:retrieve_notes' %}" hx-target="this">-->
-<!--    </div>-->
-
-    {% include table %}
+    <div hx-trigger="load, instanceListChanged from:body" hx-get="{% url 'modelnotes:retrieve_notes' %}" hx-target="this">
+    </div>
 
     <!-- wrapper for the create/update note form modal -->
     <div id="create_update_modal_wrapper">
@@ -66,7 +64,8 @@
 
     <!-- Empty toast to show the message -->
     {% include 'modelnotes/htmx/toast.htm' %}
-
+    <script src="{% static "modelnotes/js/toast.js" %}"></script></div>
     </body>
 </html>
+
 
