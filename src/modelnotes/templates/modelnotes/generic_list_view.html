@@ -1,0 +1,38 @@
+{% extends base_template|default:"handyhelpers/handyhelpers_base_bs5.htm" %}
+{% load static %}
+{% load handyhelper_tags %}
+
+{% block local_head %}
+    <script type="text/javascript" src="{% static 'node_modules/htmx.org/dist/htmx.min.js' %}"></script>
+    {% include "handyhelpers/component/bs5/table_components.htm" %}
+{% endblock %}
+
+{% block content %}
+{% load handyhelper_tags %}
+<div class="container-fluid animated fadeIn mb-5">
+    <h1><span class="text-primary"><b>{{ title }}:</b></span> {% if subtitle %}<span class="text-secondary"><small><small>{{ subtitle }}</small></small></span>{% endif %}</h1>
+
+    {% include table %}
+
+</div>
+
+<!-- wrapper for the create/update note form modal -->
+<div id="create_update_modal_wrapper">
+{% with 'create_update_modal' as modal_id %}
+{% include 'modelnotes/htmx/generic_modal.htm' %}
+{% include 'modelnotes/htmx/generic_modal_js.htm' %}
+{% endwith %}
+</div>
+
+<!-- wrapper for the delete confirmation modal -->
+<div id="delete_confirmation_modal_wrapper">
+{% with 'delete_confirmation_modal' as modal_id %}
+{% include 'modelnotes/htmx/generic_modal.htm' %}
+{% include 'modelnotes/htmx/generic_modal_js.htm' %}
+{% endwith %}
+</div>
+
+<!-- Empty toast to show the message -->
+{% include 'modelnotes/htmx/toast.htm' %}
+
+{% endblock content %}

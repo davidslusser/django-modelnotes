@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from django.shortcuts import render
 from django.views.generic import (ListView, View)
 
@@ -19,7 +21,8 @@ from test_app.models import Order
 from modelnotes.forms import NoteForm
 
 class ListOrders(View):
-    template_name = 'modelnotes/generic_htmx_list.html'
+    base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base_bs5.htm')
+    template_name = 'modelnotes/generic_list_view.html'
     form_template = 'modelnotes/form/note_form.htm'
     model = Order
 
@@ -27,12 +30,14 @@ class ListOrders(View):
         print('in ListOrders get()')
         context = dict()
         form = NoteForm(request.GET)
-        context['form'] = form
-        context['modal_id'] = 'create_update_modal'
-        context['modal_size'] = 'modal-lg'
-        context['modal_action'] = 'Create'
-        context['modal_title'] = f'Create: <span class="font-italic text-secondary">{self.model._meta.model_name.title()}</span>'
-        context['form_template'] = self.form_template
+        context['title'] = 'Orders'
+        context['subtitle'] = 'all orders'
+        # context['form'] = form
+        # context['modal_id'] = 'create_update_modal'
+        # context['modal_size'] = 'modal-lg'
+        # context['modal_action'] = 'Create'
+        # context['modal_title'] = f'Create: <span class="font-italic text-secondary">{self.model._meta.model_name.title()}</span>'
+        # context['form_template'] = self.form_template
         context['table'] = 'test_app/table/orders.htm'
         context['queryset'] = self.model.objects.all()
         return render(request, self.template_name, context)

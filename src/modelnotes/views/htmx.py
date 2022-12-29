@@ -84,9 +84,12 @@ class CreateNote(View):
         if not request.META.get('HTTP_HX_REQUEST'):
             return HttpResponse('Invalid request', status=400)
 
-        nodel_label = self.request.GET.dict().get('model_label', None)
+        model_label = self.request.GET.dict().get('model_label', None)
+        if model_label in [None, 'None', ''] or '.' not in model_label:
+            return HttpResponse('Invalid request', status=400)
+
         object_id = self.request.GET.dict().get('object_id', None)
-        app, model_name = nodel_label.split('.')
+        app, model_name = model_label.split('.')
 
         form = self.form(request.POST)
         context = dict()
@@ -221,6 +224,7 @@ class UpdateNote(View):
             note = form.save(commit=False)
             note.author = request.user
             note.save()
+            form.save_m2m()
             return HttpResponse(
                 status=204,
                 headers={

@@ -11,6 +11,7 @@ from handyhelpers.mixins.view_mixins import FilterByQueryParamsMixin
 from django.contrib.auth.models import Group
 from modelnotes.models import Note, Permission
 
+from modelnotes.helpers import get_readable_notes
 
 class ListNotesBaseView(LoginRequiredMixin, FilterByQueryParamsMixin, ListView):
     base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base_bs5.htm')
@@ -28,7 +29,7 @@ class ListMyNotes(ListNotesBaseView):
         context['queryset'] = self.filter_by_query_params()
         context['title'] = 'Notes'
         context['subtitle'] = request.user.username
-        context['table'] = 'modelnotes/table/_list_notes.htm'
+        context['table'] = 'modelnotes/table/list_notes.htm'
         context['modals'] = 'modelnotes/form/update_note.htm'
         context['groups'] = Group.objects.all()
         context['permissions'] = Permission.objects.all()
@@ -47,7 +48,7 @@ class ListGroupNotes(ListNotesBaseView):
         context['queryset'] = self.filter_by_query_params()
         context['title'] = 'Notes'
         context['subtitle'] = request.user.username + '\'s groups'
-        context['table'] = 'modelnotes/table/_list_notes.htm'
+        context['table'] = 'modelnotes/table/list_notes.htm'
         context['modals'] = 'modelnotes/form/update_note.htm'
         context['groups'] = Group.objects.all()
         context['permissions'] = Permission.objects.all()
@@ -62,46 +63,20 @@ class ListReadableNotes(ListView):
         - with a scope of 'public'
     """
     base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base_bs5.htm')
-    template_name = 'modelnotes/test.html' #'modelnotes/generic_htmx_list.html'
+    template_name = 'modelnotes/generic_list_view.html'
+    # template_name = 'modelnotes/test.html'
     model = Note
 
     def get(self, request, *args, **kwargs):
+        print('TEST: in list')
         context = dict()
-        self.queryset = Note.objects.filter(
-            Q(author=request.user) |
-            Q(groups__user=request.user, scope__name='group') |
-            Q(scope__name='public')
-        ).distinct().order_by('-updated_at'). \
-            select_related('author', 'scope', 'content_type'). \
-            prefetch_related('public_permissions', 'groups', 'content_object')
+        # self.queryset = get_readable_notes(user=request.user)
         context['base_template'] = self.base_template
-        # context['queryset'] = self.filter_by_query_params()
         context['title'] = 'Notes'
-        context['subtitle'] = 'test!'
-        # context['table'] = 'modelnotes/table/_list_notes.htm'
-        # context['modals'] = 'modelnotes/form/update_note.htm'
-        # context['groups'] = Group.objects.all()
-        # context['permissions'] = Permission.objects.all()
+        context['subtitle'] = 'Readable notes'
+        context['table'] = 'modelnotes/table/notes.htm'
+        context['queryset'] = get_readable_notes(user=request.user)
         return render(request, self.template_name, context=context)
-
-    # def get(self, request, *args, **kwargs):
-    #     context = dict()
-    #     self.queryset = Note.objects.filter(
-    #         Q(author=request.user) |
-    #         Q(groups__user=request.user, scope__name='group') |
-    #         Q(scope__name='public')
-    #     ).distinct().order_by('-updated_at'). \
-    #         select_related('author', 'scope', 'content_type'). \
-    #         prefetch_related('public_permissions', 'groups', 'content_object')
-    #     context['base_template'] = self.base_template
-    #     context['queryset'] = self.filter_by_query_params()
-    #     context['title'] = 'Notes'
-    #     context['subtitle'] = None
-    #     context['table'] = 'modelnotes/table/_list_notes.htm'
-    #     context['modals'] = 'modelnotes/form/update_note.htm'
-    #     context['groups'] = Group.objects.all()
-    #     context['permissions'] = Permission.objects.all()
-    #     return render(request, self.template, context=context)
 
 
 class ListAllNotes(ListNotesBaseView, SuperuserRequiredMixin):
@@ -115,7 +90,7 @@ class ListAllNotes(ListNotesBaseView, SuperuserRequiredMixin):
         context['queryset'] = self.filter_by_query_params()
         context['title'] = 'Notes'
         context['subtitle'] = 'all modelnotes'
-        context['table'] = 'modelnotes/table/_list_notes.htm'
+        context['table'] = 'modelnotes/table/list_notes.htm'
         context['modals'] = 'modelnotes/form/update_note.htm'
         context['groups'] = Group.objects.all()
         context['permissions'] = Permission.objects.all()

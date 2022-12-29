@@ -1,6 +1,5 @@
 from django.urls import path
 from modelnotes.views import gui
-from modelnotes.views import action
 from modelnotes.views import htmx
 from modelnotes.views import ajax
 
