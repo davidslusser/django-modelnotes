@@ -28,8 +28,7 @@ class ReadableNotesManager(HandyHelperModelManager):
 
 def get_default_scope():
     """ get the default scope """
-    data = Scope.objects.get_or_create(name='private')[0]
-    return data.id
+    return Scope.objects.get_or_create(name='private')[0]
 
 
 class Scope(HandyHelperBaseModel):
@@ -79,6 +78,8 @@ class Note(HandyHelperBaseModel):
     content_object = GenericForeignKey('content_type', 'object_id')
     if 'auditlog' in settings.INSTALLED_APPS:
         history = AuditlogHistoryField()
+
+    objects = ReadableNotesManager()
 
     def clean(self):
         """ runs validations before saving """

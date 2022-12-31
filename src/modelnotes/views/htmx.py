@@ -5,7 +5,7 @@ from django.views.generic import (ListView, View)
 from django.contrib.contenttypes.models import ContentType
 
 # import models
-from modelnotes.models import Note, Permission
+from modelnotes.models import Note, Permission, get_default_scope
 
 from modelnotes.views.action import check_managability
 from modelnotes.forms import NoteForm
@@ -101,6 +101,8 @@ class CreateNote(View):
             instance.content_type = ContentType.objects.get(app_label=app,
                                                             model=model_name)
             instance.object_id = int(object_id)
+            if not form.cleaned_data.get('scope'):
+                instance.scope = get_default_scope()
             instance.save()
             form.save_m2m()
             return HttpResponse(
@@ -163,7 +165,7 @@ class RetrieveNotes(ListView):
         </div>
     """
     model = Note
-    template_name = 'modelnotes/table/list_notes.htm'
+    template_name = 'modelnotes/table/notes.htm'
 
     def get(self, request, *args, **kwargs):
         if not request.META.get('HTTP_HX_REQUEST'):
@@ -171,7 +173,7 @@ class RetrieveNotes(ListView):
         context = dict()
         context['delete_modal_id'] = 'delete_confirmation_modal'
         context['create_update_modal_id'] = 'create_update_modal'
-        context['note_list'] = get_all_notes(request.user)
+        context['queryset'] = get_all_notes(request.user)
         return render(request, self.template_name, context=context)
 
 

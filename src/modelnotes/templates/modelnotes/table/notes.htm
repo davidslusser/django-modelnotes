@@ -1,3 +1,5 @@
+{% load modelnotes_tags %}
+{% load static %}
 <table class="table table-condensed table-bordered table-striped" data-toggle="table" data-search="true"
        data-flat="true" data-pagination="true" data-show-pagination-switch="true" data-show-columns="true"
        data-show-export="true" data-reorderable-columns="true" data-resizable="false" data-export-types="['excel','csv','txt','sql']">
@@ -50,7 +52,7 @@
                 </a>
 
                 <!-- delete note -->
-                <a href="#" hx-get="{% url 'modelnotes:delete_note' pk=row.pk %}" hx-target="#{% if delete_modal %}{{ delete_modal }}{% else %}delete_modal{% endif %}_wrapper" style="text-decoration: none">
+                <a href="#" hx-get="{% url 'modelnotes:delete_note' pk=row.pk %}" hx-target="#{% if delete_confirmation_modal %}{{ delete_confirmation_modal }}{% else %}delete_confirmation_modal{% endif %}_wrapper" style="text-decoration: none">
                     <span class="mx-1 hvr-grow"><i class="fas fa-trash"></i></span>
                 </a>
             </td>

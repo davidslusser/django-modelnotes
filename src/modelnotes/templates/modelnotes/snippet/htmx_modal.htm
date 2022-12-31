@@ -1,6 +1,65 @@
-<div id="create_update_modal_wrapper">
-{% with 'create_update_modal' as modal_id %}
-{% include 'modelnotes/htmx/generic_modal.htm' %}
-{% include 'modelnotes/htmx/generic_modal_js.htm' %}
-{% endwith %}
+<div class="modal fade" tabindex="-1" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}">
+    <div class="modal-dialog {% if modal_size %}{{ modal_size }}{% endif %}" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_dialog">
+        {% if form %}
+        <form hx-post="{% if hx_post %}{{ hx_post }}{% else %}{{ request.path }}{% endif %}"
+              hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+              class="modal-content">
+        {% else %}
+        <div class="modal-content" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_content">
+        {% endif %}
+            <div class="modal-header">
+                <h5 class="modal-title">{% if modal_title %}{{ modal_title|safe }}{% else %}{% endif %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_body">
+            {% if form %}
+                {% if form_template %}
+                    {% include form_template %}
+                {% else %}
+                    {{ form.as_p }}
+                {% endif %}
+            {% else %}
+                {% if modal_body %}{{ modal_body|safe }}{% endif %}
+            {% endif %}
+            </div>
+            <div class="modal-footer" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_close">Close</button>
+                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_submit"
+                {% if not form %}
+                {{ request.htmx_method }}="{{ request.path }}"
+                hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                id="{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_submit"
+                {% endif %}
+                >{% if modal_action %}{{ modal_action }}{% else %}Submit{% endif %}</button>
+            </div>
+        {% if form %}
+        </form>
+        {% else %}
+        </div>
+        {% endif %}
+    </div>
 </div>
+
+<script type="text/javascript">
+    ;(function () {
+
+        htmx.on("htmx:afterSwap", (e) => {
+            // Response targeting #dialog => show the modal
+            if (e.detail.target.id == "{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper") {
+            const {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %} = new bootstrap.Modal(document.getElementById("{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}"))
+            {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}.show()
+            }
+        })
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            // Empty response targeting #dialog => hide the modal
+            if (e.detail.target.id == "{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper" && !e.detail.xhr.response) {
+            const {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %} = new bootstrap.Modal(document.getElementById("{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}"))
+            {% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}.hide()
+            e.detail.shouldSwap = false
+            document.getElementById("{% if modal_id %}{{ modal_id }}{% else %}id_modal{% endif %}_wrapper").innerHTML = ""
+            }
+        })
+
+    })()
+</script>
