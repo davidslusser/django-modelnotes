@@ -1,8 +1,8 @@
 import json
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import (ListView, View)
-from django.contrib.contenttypes.models import ContentType
 
 # import models
 from modelnotes.models import Note, Permission, get_default_scope
@@ -10,6 +10,7 @@ from modelnotes.models import Note, Permission, get_default_scope
 from modelnotes.views.action import check_managability
 from modelnotes.forms import NoteForm
 from modelnotes.helpers import get_all_notes
+
 
 class GetScopeFields(View):
     """ get groups or permissions based on scope and build dropdown for create/edit modelnote form """
@@ -179,7 +180,7 @@ class RetrieveNotes(ListView):
 
 class UpdateNote(View):
     """
-    Update a Note instance via htmx. The Get method creates the update form and modal. The post method updates the
+    Update a Note instance via htmx. The Get method builds the update form and modal. The post method updates the
     instance and triggers a confirmation via Bootstrap toast.
 
     Example usage in a template:

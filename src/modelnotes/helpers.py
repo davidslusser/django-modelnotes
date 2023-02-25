@@ -111,10 +111,4 @@ def get_all_notes(user: User) -> QuerySet:
     Note = apps.get_model('modelnotes', 'Note')
     if user.is_superuser:
         return Note.objects.all()
-    return Note.objects.filter(
-            Q(author=user) |
-            Q(groups__user=user, scope__name='group') |
-            Q(scope__name='public')
-        ).distinct().order_by('-updated_at')\
-            .select_related('author', 'scope', 'content_type')\
-            .prefetch_related('public_permissions', 'groups', 'content_object')
+    return get_readable_notes(user)
