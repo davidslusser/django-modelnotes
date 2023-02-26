@@ -1,8 +1,5 @@
 {% load modelnotes_tags %}
 {% load static %}
-
-{% comment %}
-{% endcomment %}
 <table class="table table-condensed table-bordered table-striped" data-toggle="table" data-search="true"
        data-flat="true" data-pagination="true" data-show-pagination-switch="true" data-show-columns="true"
        data-show-export="true" data-reorderable-columns="true" data-resizable="false" data-export-types="['excel','csv','txt','sql']">
@@ -17,7 +14,7 @@
         </tr>
     </thead>
     <tbody>
-    {% for row in note_list %}
+    {% for row in queryset %}
         <tr>
             <td>{{ row.title }}</td>
             <td>{{ row.author }}</td>
@@ -50,12 +47,12 @@
                 {% endcomment %}
 
                 <!-- update note -->
-                <a href="#" hx-get="{% url 'modelnotes:update_note' pk=row.pk %}" hx-target="#{% if create_update_modal_id %}{{ create_update_modal_id }}{% else %}create_update_modal_id{% endif %}_wrapper" style="text-decoration: none">
+                <a href="#" hx-get="{% url 'modelnotes:update_note' pk=row.pk %}" hx-target="#{% if create_update_modal %}{{ create_update_modal }}{% else %}create_update_modal{% endif %}_wrapper" style="text-decoration: none">
                     <span class="mx-1 hvr-grow" style="text-decoration: none"><i class="fas fa-edit"></i></span>
                 </a>
 
                 <!-- delete note -->
-                <a href="#" hx-get="{% url 'modelnotes:delete_note' pk=row.pk %}" hx-target="#{% if delete_modal_id %}{{ delete_modal_id }}{% else %}id_delete_modal{% endif %}_wrapper" style="text-decoration: none">
+                <a href="#" hx-get="{% url 'modelnotes:delete_note' pk=row.pk %}" hx-target="#{% if delete_confirmation_modal %}{{ delete_confirmation_modal }}{% else %}delete_confirmation_modal{% endif %}_wrapper" style="text-decoration: none">
                     <span class="mx-1 hvr-grow"><i class="fas fa-trash"></i></span>
                 </a>
             </td>
@@ -65,6 +62,5 @@
     </tbody>
 
 </table>
-{% comment %}
-{% endcomment %}
 
+{% include 'handyhelpers/component/clipboard.htm' %}

@@ -134,3 +134,4 @@ dmypy.json
 # other
 local_test
 *.sqlite3
+/test_project/static-root/

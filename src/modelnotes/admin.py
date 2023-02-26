@@ -21,9 +21,9 @@ set_public.short_description = 'set scope to public'
 
 
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'author', 'scope', 'content', 'created_at', 'updated_at', 'content_type', 'object_id', 'object_repr']
+    list_display = ['id', 'title', 'author', 'scope', 'content', 'content_type', 'object_id', 'object_repr', 'created_at', 'updated_at',]
     search_fields = ['title', 'scope', 'content', 'object_id', 'object_repr']
-    list_filter = ['author', 'scope', 'content_type']
+    list_filter = ['author', 'scope']
     actions = [set_private, set_public]
 
     def save_related(self, request, form, formsets, change):

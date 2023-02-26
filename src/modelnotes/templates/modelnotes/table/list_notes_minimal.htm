@@ -1,8 +1,7 @@
-{% load modelnotes_tags %}
-{% load static %}
-
-{% comment %}
-{% endcomment %}
+<a href="#" title="create note" role="button" data-toggle="tooltip" data-placement="left" style="text-decoration: none"
+   onClick="CreateNote('{% url 'modelnotes:create_note' %}?model={{ row|label }}&id={{ row.id }}', 'Create Note: <small>{{ row }}</small> ', 'Create');">
+    <i class="fas fa-edit text-primary mx-1"></i>
+</a>
 <table class="table table-condensed table-bordered table-striped" data-toggle="table" data-search="true"
        data-flat="true" data-pagination="true" data-show-pagination-switch="true" data-show-columns="true"
        data-show-export="true" data-reorderable-columns="true" data-resizable="false" data-export-types="['excel','csv','txt','sql']">
@@ -17,7 +16,7 @@
         </tr>
     </thead>
     <tbody>
-    {% for row in note_list %}
+    {% for row in queryset %}
         <tr>
             <td>{{ row.title }}</td>
             <td>{{ row.author }}</td>
@@ -26,7 +25,6 @@
             <td>{{ row.updated_at }}</td>
             {# actions #}
             <td>
-                {% comment %}
                 <!-- copy note contents -->
                   <input type="hidden" id="id_copy_{{ row.id }}" value="{{ row.content }}">
                   <a href="#" title="view note content" class="cpy" data-clipboard-target="#id_copy_{{ row.id }}" style="text-decoration: none">
@@ -47,24 +45,22 @@
                     <span class="mx-1 hvr-grow"><i class="fa fa-history fa-fw mx-1"></i></span>
                 </a>
 
-                {% endcomment %}
-
                 <!-- update note -->
-                <a href="#" hx-get="{% url 'modelnotes:update_note' pk=row.pk %}" hx-target="#{% if create_update_modal_id %}{{ create_update_modal_id }}{% else %}create_update_modal_id{% endif %}_wrapper" style="text-decoration: none">
-                    <span class="mx-1 hvr-grow" style="text-decoration: none"><i class="fas fa-edit"></i></span>
+                <a href="#" title="update note" role="button" data-toggle="tooltip" data-placement="left" style="text-decoration: none"
+                   onClick="UpdateNote('{% url 'modelnotes:update_note' %}?id={{ row.id }}', 'Update Note: <small>{{ row.title }}</small> ', '{{ row.title }}', '{{ row.content }}', '{{ row.scope }}', '{% for permission in row.public_permissions.all %}{{ permission }} {% endfor %}', '{% for group in row.groups.all %}{{ group }} {% endfor %}', 'Update');">
+                    <span class="mx-1 hvr-grow"><i class="fas fa-edit text-primary"></i></span>
                 </a>
 
                 <!-- delete note -->
-                <a href="#" hx-get="{% url 'modelnotes:delete_note' pk=row.pk %}" hx-target="#{% if delete_modal_id %}{{ delete_modal_id }}{% else %}id_delete_modal{% endif %}_wrapper" style="text-decoration: none">
+                <a href="#" title="delete note" role="button" data-toggle="tooltip" data-placement="left" style="text-decoration: none"
+                   onClick="confirmAction('{% url "modelnotes:delete_note" row.pk %}', 'Delete note', 'This note will be permanently deleted; do you wish to continue?', 'Continue', 'POST');">
                     <span class="mx-1 hvr-grow"><i class="fas fa-trash"></i></span>
                 </a>
             </td>
-
         </tr>
     {% endfor %}
     </tbody>
-
 </table>
-{% comment %}
-{% endcomment %}
 
+{% include 'handyhelpers/component/clipboard.htm' %}
+{% include 'modelnotes/form/create_note.htm' %}
