@@ -5,12 +5,12 @@ from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.http import require_GET
 
-from modelnotes.views.action import check_managability
+from djangoaddicts.modelnotes.views.action import check_managability
 
 # import models
 if 'auditlog' in settings.INSTALLED_APPS:
     from auditlog.models import LogEntry
-from modelnotes.models import Note
+from djangoaddicts.modelnotes.models import Note
 
 
 @require_GET

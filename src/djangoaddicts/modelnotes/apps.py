@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class NotesConfig(AppConfig):
-    name = 'modelnotes'
+    name = 'djangoaddicts.modelnotes'
     verbose_name = 'Django Model Notes'

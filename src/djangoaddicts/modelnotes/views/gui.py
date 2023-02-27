@@ -3,7 +3,7 @@ from django.conf import settings
 from braces.views import SuperuserRequiredMixin
 from handyhelpers.views import HandyHelperListPlusCreateAndFilterView
 
-from modelnotes.helpers import get_all_notes, get_group_notes, get_user_notes, get_readable_notes
+from djangoaddicts.modelnotes.helpers import get_all_notes, get_group_notes, get_user_notes, get_readable_notes
 
 
 class ListNotesBaseView(HandyHelperListPlusCreateAndFilterView):

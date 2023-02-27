@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'auditlog',
     'widget_tweaks',
     'handyhelpers',
-    'modelnotes',
+    'djangoaddicts.modelnotes',
     'test_app',
 ]
 

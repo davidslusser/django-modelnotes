@@ -6,12 +6,7 @@ include setup.py
 include setup.cfg
 
 # Include the src files
-recursive-include src *
+recursive-include src/djangoaddicts/modelnotes *
 
 # Exclude test files
-exclude manage.py
-recursive-exclude test *
-
-# Exclude local_project
-exclude src/local_projects
-exclude src/manage.py
+exclude src/djangoaddicts/manage.py

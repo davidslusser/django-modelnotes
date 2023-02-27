@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 import os
+import environ
 import sys
+
+sys.path.append(str(environ.Path(__file__) - 3))
+from src import djangoaddicts
 
 
 def main() -> None:

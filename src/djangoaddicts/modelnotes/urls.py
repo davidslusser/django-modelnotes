@@ -1,7 +1,7 @@
 from django.urls import path
-from modelnotes.views import gui
-from modelnotes.views import htmx
-from modelnotes.views import ajax
+from .views import gui
+from .views import htmx
+from .views import ajax
 
 app_name = 'modelnotes'
 

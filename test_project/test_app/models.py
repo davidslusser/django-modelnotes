@@ -1,5 +1,5 @@
 from django.db import models
-from modelnotes.fields import ModelNoteField
+from djangoaddicts.modelnotes.fields import ModelNoteField
 
 
 class Product(models.Model):

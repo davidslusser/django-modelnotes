@@ -1,11 +1,12 @@
 from django.conf import settings
 
 from django.shortcuts import render
-from django.views.generic import (ListView, View)
+from django.views.generic import (DetailView, ListView, View)
 
 from handyhelpers.views import HandyHelperListView
 
 from test_app.models import Order
+from djangoaddicts.modelnotes.helpers import get_all_notes
 
 
 # class ListOrders(HandyHelperListView):
@@ -18,7 +19,7 @@ from test_app.models import Order
 
     # need to add the create_update modal and js for modal controls and toast
 
-from modelnotes.forms import NoteForm
+from djangoaddicts.modelnotes.forms import NoteForm
 
 class ListOrders(View):
     base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base_bs5.htm')
@@ -27,7 +28,7 @@ class ListOrders(View):
     model = Order
 
     def get(self, request, *args, **kwargs):
-        print('in ListOrders get()')
+        print('TEST: in ListOrders()')
         context = dict()
         form = NoteForm(request.GET)
         context['title'] = 'Orders'
@@ -41,3 +42,19 @@ class ListOrders(View):
         context['table'] = 'test_app/table/orders.htm'
         context['queryset'] = self.model.objects.all()
         return render(request, self.template_name, context)
+
+
+class DetailOrder(DetailView):
+    model = Order
+    base_template = getattr(settings, 'BASE_TEMPLATE', 'handyhelpers/handyhelpers_base_bs5.htm')
+    template_name = "test_app/detail/detail_order.html"
+
+    def get_context_data(self, **kwargs):
+        # print(self.object.notes.readable_notes(self.request.user))
+        # print(self.object)
+        # print(self.object.notes.all())
+        context = super(DetailOrder, self).get_context_data(**kwargs)
+        context['base_template'] = self.base_template
+        # context['readable_notes'] = get_all_notes(user=self.request.user, instance=self.object)
+        context['readable_notes'] = self.object.notes.filter(user=self.request.user)#, title='n7')
+        return context

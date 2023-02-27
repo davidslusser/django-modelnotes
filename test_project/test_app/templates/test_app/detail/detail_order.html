@@ -1,0 +1,27 @@
+{% extends base_template|default:"base.htm" %}
+{% load static %}
+
+{% block local_head %}
+<style>
+    body {
+        background-color: lightgrey;
+    }
+</style>
+{% endblock local_head %}
+
+{% block content %}
+<section class="mb-5">
+   <h1>
+       <span class="text-primary"><b>Order:</b></span>
+       <span class="text-secondary"><small>{{ object }}</small></span>
+   </h1>
+</section>
+This is the detail page for order: {{ object }}
+
+<br>
+{{ object.notes.all }}
+<br>
+{{ readable_notes }}
+<br>
+
+{% endblock content %}

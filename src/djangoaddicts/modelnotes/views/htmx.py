@@ -1,15 +1,16 @@
 import json
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import (ListView, View)
 
 # import models
-from modelnotes.models import Note, Permission, get_default_scope
+from djangoaddicts.modelnotes.models import Note, Permission, get_default_scope
 
-from modelnotes.views.action import check_managability
-from modelnotes.forms import NoteForm
-from modelnotes.helpers import get_all_notes
+from djangoaddicts.modelnotes.views.action import check_managability
+from djangoaddicts.modelnotes.forms import NoteForm
+from djangoaddicts.modelnotes.helpers import get_all_notes
 
 
 class GetScopeFields(View):
@@ -203,6 +204,7 @@ class UpdateNote(View):
     template_name = 'modelnotes/htmx/generic_modal.htm' # this is the template for the modal that houses the form
 
     def post(self, request, *args, **kwargs):
+        print('TEST: in update_note()')
         """ update a Note instance and confirm update via Bootstrap 'toast' """
         if not request.META.get('HTTP_HX_REQUEST'):
             return HttpResponse('Invalid request', status=400)
@@ -322,3 +324,25 @@ class DeleteNote(View):
         context['modal_body'] = f'<span class="font-italic text-secondary">{instance}</span> will be permanently ' \
                                 f'deleted. Do you wish to continue?'
         return render(request, self.template_name, context)
+
+
+class GetNotes(View):
+    """ get a list of notes, accessible to the current user, for a given object instance """
+
+    def get(self, request, *args, **kwargs):
+        """ """
+        if not request.META.get('HTTP_HX_REQUEST'):
+            return HttpResponse('Invalid request', status=400)
+        model_label = self.request.GET.dict().get('model_label', None)
+        object_id = self.request.GET.dict().get('object_id', None)
+        if model_label in [None, 'None', ''] or '.' not in model_label or not object_id:
+            return HttpResponse('Invalid request', status=400)
+
+        app, model_name = model_label.split('.')
+        model = apps.get_model(app, model_name)
+        instance = model.objects.get(id=object_id)
+
+        template_name = 'lims/htmx/note_list_in_card_body.htm'
+        context = dict()
+        context['queryset'] = instance.notes.readable_notes(user=request.user)
+        return render(request, template_name, context=context)

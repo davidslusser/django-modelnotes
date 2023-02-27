@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # import models
-from modelnotes.models import (Note, Permission)
+from .models import (Note, Permission)
 
 
 def set_private(modeladmin, request, queryset):

@@ -4,7 +4,7 @@ from django.db.models.query import QuerySet
 from django.contrib.auth.models import User
 
 
-def check_managability(user, note, action):
+def check_managability(user: User, note, action: str) -> bool:
     """
     Determine if user can edit or delete this note. This note can be edited or deleted if at least one of the
     following criteria is met:
@@ -22,6 +22,8 @@ def check_managability(user, note, action):
         True if this note can be managed by the provided user
         False if this note can not be managed by the provided user
     """
+    if user.is_anonymous:
+        return False
     if action not in 'readeditdelete':
         return False
     if user.is_superuser:
@@ -48,6 +50,8 @@ def get_user_notes(user: User) -> QuerySet:
         filtered queryset of Notes
     """
     Note = apps.get_model('modelnotes', 'Note')
+    if user.is_anonymous:
+        return Note.objects.none()
     return Note.objects.filter(author=user).distinct().order_by('-updated_at')\
         .select_related('author', 'scope', 'content_type')\
         .prefetch_related('public_permissions', 'groups', 'content_object')
@@ -65,13 +69,15 @@ def get_group_notes(user: User) -> QuerySet:
         filtered queryset of Notes
     """
     Note = apps.get_model('modelnotes', 'Note')
+    if user.is_anonymous:
+        return Note.objects.none()
     return Note.objects.filter(groups__user=user, scope__name='group').distinct()\
             .order_by('-updated_at')\
             .select_related('author', 'scope', 'content_type')\
             .prefetch_related('public_permissions', 'groups', 'content_object')
 
 
-def get_readable_notes(user: User) -> QuerySet:
+def get_readable_notes(user: User, instance) -> QuerySet:
     """
     Return a queryset of Notes that the provided user can read:
         - authored by user
@@ -80,21 +86,35 @@ def get_readable_notes(user: User) -> QuerySet:
 
     Args:
         user: django User object
+        instance: instance of a django model
 
     Returns:
         filtered queryset of Notes
     """
+    # print('TEST: in get_readable_notes()')
+    # print(user, instance)
     Note = apps.get_model('modelnotes', 'Note')
-    return Note.objects.filter(
-            Q(author=user) |
-            Q(groups__user=user, scope__name='group') |
-            Q(scope__name='public')
-        ).distinct().order_by('-updated_at')\
-            .select_related('author', 'scope', 'content_type')\
-            .prefetch_related('public_permissions', 'groups', 'content_object')
+    if user.is_anonymous:
+        return Note.objects.none()
+    if instance:
+        return instance.notes.filter(
+                Q(author=user) |
+                Q(groups__user=user, scope__name='group') |
+                Q(scope__name='public')
+            ).distinct().order_by('-updated_at')\
+                .select_related('author', 'scope', 'content_type')\
+                .prefetch_related('public_permissions', 'groups', 'content_object')
+    else:
+        return Note.objects.filter(
+                Q(author=user) |
+                Q(groups__user=user, scope__name='group') |
+                Q(scope__name='public')
+            ).distinct().order_by('-updated_at')\
+                .select_related('author', 'scope', 'content_type')\
+                .prefetch_related('public_permissions', 'groups', 'content_object')
 
 
-def get_all_notes(user: User) -> QuerySet:
+def get_all_notes(user: User, instance) -> QuerySet:
     """
     Return a queryset of Notes that the provided user can read:
         - authored by user
@@ -104,11 +124,20 @@ def get_all_notes(user: User) -> QuerySet:
 
     Args:
         user: django User object
+        instance: instance of a django model
 
     Returns:
         filtered queryset of Notes
     """
+    # print('TEST: in get_all_notes()')
+    # print(user)
+    # print(instance)
     Note = apps.get_model('modelnotes', 'Note')
+    if user.is_anonymous:
+        return Note.objects.none()
     if user.is_superuser:
-        return Note.objects.all()
-    return get_readable_notes(user)
+        if instance:
+            return instance.notes.all()
+        else:
+            return Note.objects.all()
+    return get_readable_notes(user, instance)

@@ -1,6 +1,11 @@
 from pathlib import Path
 from typing import List
 
+import sys
+import environ
+sys.path.append(str(environ.Path(__file__) - 3))
+from src import djangoaddicts
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).parent.parent
 
@@ -27,7 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'local_project.apps.TestAppConfig',
-    'modelnotes',
+    'djangoaddicts.modelnotes',
 ]
 
 MIDDLEWARE = [

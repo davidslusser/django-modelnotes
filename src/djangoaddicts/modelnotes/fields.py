@@ -1,6 +1,6 @@
 from django.db import DEFAULT_DB_ALIAS
 from django.contrib.contenttypes.fields import GenericRelation
-from modelnotes.models import Note
+from .models import Note
 
 
 class ModelNoteField(GenericRelation):

@@ -8,7 +8,7 @@ from braces.views import LoginRequiredMixin
 
 # import models
 from django.contrib.auth.models import Group
-from modelnotes.models import (Scope, Permission, Note)
+from djangoaddicts.modelnotes.models import (Scope, Permission, Note)
 
 
 def check_managability(user, note, action):
