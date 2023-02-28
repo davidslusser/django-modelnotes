@@ -1,7 +1,9 @@
 {% extends base_template|default:"base.htm" %}
 {% load static %}
+{% load model_meta_tags %}
 
 {% block local_head %}
+<script type="text/javascript" src="{% static 'node_modules/htmx.org/dist/htmx.min.js' %}"></script>
 <style>
     body {
         background-color: lightgrey;
@@ -19,9 +21,38 @@
 This is the detail page for order: {{ object }}
 
 <br>
+<a href="#" class="hvr-grow title" hx-get="{% url 'modelnotes:create_note' %}?model_label={{ object|label_lower }}&object_id={{ object.id }}" hx-target="#create_update_modal_wrapper">
+    <span title="Create a new note attached to this order">
+        <i class="fas fa-plus-circle mx-2"></i>
+    </span>
+</a>
+<br>
+
+<br>
 {{ object.notes.all }}
 <br>
 {{ readable_notes }}
 <br>
+
+<div class="card shadow mb-3" style="height: 250px">
+    <div class="card-header">Notes for {{ object }}</div>
+    <div class="card-body text-center" style="overflow-y: auto; overflow-x: none;"
+    hx-trigger="load, instanceListChanged from:body" hx-get="{% url 'modelnotes:get_notes_for_instance' %}?model_label={{ object|label_lower }}&object_id={{ object.id }}" hx-target="this">
+    </div>
+</div>
+
+<div id="create_update_modal_wrapper">
+{% with 'create_update_modal' as modal_id %}
+{% include 'modelnotes/htmx/generic_modal.htm' %}
+{% include 'modelnotes/htmx/generic_modal_js.htm' %}
+{% endwith %}
+</div>
+
+{% include 'modelnotes/form/create_note.htm' %}
+{% include 'modelnotes/form/update_note.htm' %}
+{% include 'modelnotes/htmx/toast.htm' %}
+
+{% include 'handyhelpers/component/bs5/modals.htm' %}
+{% include 'handyhelpers/component/clipboard.htm' %}
 
 {% endblock content %}

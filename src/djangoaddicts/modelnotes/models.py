@@ -8,7 +8,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from handyhelpers.managers import HandyHelperModelManager
 from handyhelpers.models import HandyHelperBaseModel
-# from .managers import ReadableNotesManager
 from .helpers import get_all_notes
 
 if 'auditlog' in settings.INSTALLED_APPS:
@@ -23,85 +22,27 @@ def get_default_scope():
 
 class ReadableNotesManager(HandyHelperModelManager):
 
-    # def all(self, *args, **kwargs):
-    #     user = kwargs.get('user', None)
-    #     if not user:
-    #         return Note.objects.none()
-    #     return get_all_notes(user=user, instance=self.instance)
+    def all(self, *args, **kwargs):
+        """ only allow retrieval of notes that user can read; return empty queryset if user note provided """
+        user = kwargs.get('user', None)
+        if not user:
+            return Note.objects.none()
+        return self.get_queryset().complex_filter(
+                Q(author=user) |
+                Q(groups__user=user, scope__name='group') |
+                Q(scope__name='public')
+            )
 
     def filter(self, *args, **kwargs):
-        # print(args)
-        # print(kwargs)
-        # print('TEST: ', dir(self))
+        """ only allow retrieval of notes that user can read; return empty queryset if user note provided """
         user = kwargs.pop('user', None)
-        print('TEST: ', self.get_queryset()._filter_or_exclude(False, args, kwargs))
+        if not user:
+            return Note.objects.none()
         return self.get_queryset()._filter_or_exclude(False, args, kwargs).complex_filter(
                 Q(author=user) |
                 Q(groups__user=user, scope__name='group') |
                 Q(scope__name='public')
             )
-        # print(user)
-        # if user:
-        #     # self.get_queryset = get_all_notes(user=user, instance=self.instance)
-        #     qs = get_all_notes(user=user, instance=self.instance)
-        #     print('TEST: qs = ', qs)
-
-        # else:
-        #     return Note.objects.none
-        # super(ReadableNotesManager, self).filter(*args, **kwargs)
-        # return super(ReadableNotesManager, self).get_queryset()#.filter(**kwargs)
-        #     Q(author=user) |
-        #     Q(groups__user=user, scope__name='group') |
-        #     Q(scope__name='public')
-        # ).distinct().order_by('-updated_at') \
-        #     .select_related('author', 'scope', 'content_type') \
-        #     .prefetch_related('public_permissions', 'groups', 'content_object'
-        # ).filter(**kwargs)
-        # # return get_all_notes(user=user, instance=self.instance)
-
-    def readable_notes(self, *args, **kwargs):
-        print('TEST: readable_notes()')
-        user = kwargs.get('user', None)
-        print(get_all_notes(user=user, instance=self.instance))
-        print(user)
-        if not user:
-            return Note.objects.none()
-        return get_all_notes(user=user, instance=self.instance)
-
-    #
-    # def all(self, *args, **kwargs):
-    #     print('TEST: all()')
-    #     user = kwargs.get('user', None)
-    #     print(get_all_notes(user=user, instance=self.instance))
-    #     print(user)
-    #     if not user:
-    #         return Note.objects.none()
-    #     return get_all_notes(user=user, instance=self.instance)
-    #
-    # def exclude(self, *args, **kwargs):
-    #     user = kwargs.get('user', None)
-    #     if not user:
-    #         return Note.objects.none()
-    #     return get_all_notes(user=user, instance=self.instance)
-    #
-    # def filter(self, *args, **kwargs):
-    #     user = kwargs.get('user', None)
-    #     if not user:
-    #         return Note.objects.none()
-    #     return get_all_notes(user=user, instance=self.instance)
-    #
-    # def first(self, *args, **kwargs):
-    #     user = kwargs.get('user', None)
-    #     if not user:
-    #         return Note.objects.none()
-    #     return get_all_notes(user=user, instance=self.instance).first()
-    #
-    # def last(self, *args, **kwargs):
-    #     user = kwargs.get('user', None)
-    #     if not user:
-    #         return Note.objects.none()
-    #     return get_all_notes(user=user, instance=self.instance).last()
-
 
 class Scope(HandyHelperBaseModel):
     """ Track the scope of a note; build-in scopes include:
@@ -186,7 +127,6 @@ class Note(HandyHelperBaseModel):
 
     def set_read_permission(self):
         """ automatically add the 'read' permission if scope is set to 'public' """
-        # https://www.py4u.net/discuss/204721
         if self.scope and self.scope.name == 'public':
                 self.public_permissions.add(Permission.objects.get_or_create(name='read')[0])
 

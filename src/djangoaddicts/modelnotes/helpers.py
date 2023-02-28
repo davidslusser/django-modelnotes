@@ -129,9 +129,6 @@ def get_all_notes(user: User, instance) -> QuerySet:
     Returns:
         filtered queryset of Notes
     """
-    # print('TEST: in get_all_notes()')
-    # print(user)
-    # print(instance)
     Note = apps.get_model('modelnotes', 'Note')
     if user.is_anonymous:
         return Note.objects.none()

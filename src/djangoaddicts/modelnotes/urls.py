@@ -23,5 +23,7 @@ urlpatterns = [
     path('delete_note/<int:pk>/', htmx.DeleteNote.as_view(), name='delete_note'),
     path('get_scope_fields/', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
     path('get_scope_fields/<int:pk>', htmx.GetScopeFields.as_view(), name='get_scope_fields'),
+    path('get_notes_for_instance/', htmx.GetNotesForInstance.as_view(), name='get_notes_for_instance'),
+
 
 ]

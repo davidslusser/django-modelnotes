@@ -326,7 +326,7 @@ class DeleteNote(View):
         return render(request, self.template_name, context)
 
 
-class GetNotes(View):
+class GetNotesForInstance(View):
     """ get a list of notes, accessible to the current user, for a given object instance """
 
     def get(self, request, *args, **kwargs):
@@ -341,8 +341,10 @@ class GetNotes(View):
         app, model_name = model_label.split('.')
         model = apps.get_model(app, model_name)
         instance = model.objects.get(id=object_id)
-
-        template_name = 'lims/htmx/note_list_in_card_body.htm'
+        print('TEST: ', model)
+        print('TEST: ', instance)
+        template_name = 'modelnotes/snippet/note_list_in_card_body.htm'
         context = dict()
-        context['queryset'] = instance.notes.readable_notes(user=request.user)
+        print('TEST: ', instance.notes.all(user=request.user))
+        context['queryset'] = instance.notes.all(user=request.user)
         return render(request, template_name, context=context)

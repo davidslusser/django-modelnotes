@@ -1,0 +1,37 @@
+{% comment %}
+Notes attached to an entity instance displayed in a card body
+{% endcomment %}
+
+<script>
+    $(document).ready(function(){
+        $('[data-bs-toggle="popover"]').popover({
+            placement : 'top',
+            trigger : 'hover'
+        });
+    });
+</script>
+
+{% for note in queryset %}
+    <div class="bg-light border shadow-sm mb-2 hvr-grow" style="width: 91%; height: 35px; padding-top: .28rem; border-radius: .25em;">
+        <div class="row ml-2 mr-2">
+            <div class="col-1 text-left text-primary" style="cursor: pointer;" onClick="showInfo('{% url "modelnotes:get_note_details" %}', '{{ note.id }}', 'Note Details: <small><i>{{ note }}</i></small>', true);">
+                {{ note.get_icon|safe }}
+            </div>
+            <div class="col-8 text-left" style="cursor: pointer;" onClick="showInfo('{% url "modelnotes:get_note_details" %}', '{{ note.id }}', 'Note Details: <small><i>{{ note }}</i></small>', true);">
+                <span class="small">
+                    {{ note }}:
+                    <span class="mx-2 text-secondary font-italic"><small>{{ note.created_at }}</small></span>
+                </span>
+            </div>
+            <div class="col-3 text-right">
+                <input type="hidden" id="id_copy_{{ note.id }}" value="{{ note.content }}">
+                <a href="#" data-bs-toggle="popover" data-bs-content="copy note contents to clipboard" class="cpy" data-clipboard-target="#id_copy_{{ note.id }}" style="text-decoration: none">
+                    <span class="mx-1 hvr-grow"><i class="fas fa-copy"></i></span>
+                </a>
+                <a href="#" data-bs-toggle="popover" data-bs-content="edit this note" hx-get="{% url 'modelnotes:update_note' pk=note.pk %}" hx-target="#{% if create_update_modal_id %}{{ create_update_modal_id }}{% else %}create_update_modal{% endif %}_wrapper">
+                    <span class="mx-1 hvr-grow"><i class="fas fa-edit"></i></span>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endfor %}
